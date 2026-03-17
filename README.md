@@ -23,7 +23,7 @@ This project uses chemical measurements from 2,728 groundwater monitoring sites 
 
 ```
 ├── data/
-│   └── water_quality.xlsx    # Download separately (see below)
+│   └── Calidad_del_Agua_Subterr_nea_p_2012-2024_15082025.xlsx    # Download separately (see below)
 ├── mexico_groundwater_quality_classification.ipynb
 ├── requirements.txt
 └── .gitignore
@@ -37,7 +37,7 @@ Download the dataset from CONAGUA (Mexico's National Water Commission):
 
 Scroll to the last section of the page: **"Indicadores de la calidad del agua subterránea a nivel nacional"**. Download the file under **B. Periodo 2012-2024 → Calidad del Agua Subterránea (Excel)**.
 
-Once downloaded, place the file inside a `data/` folder in the project root and rename it `water_quality.xlsx`.
+Once downloaded, place the file inside a `data/` folder in the project root and rename it `Calidad_del_Agua_Subterr_nea_p_2012-2024_15082025.xlsx`.
 
 ## How to Run
 
