@@ -52,7 +52,7 @@ cd your-repo-name
 pip install -r requirements.txt
 ```
 
-3. Download the data (see above) and place it in `data/water_quality.xlsx`
+3. Download the data (see above) and place it in `data/Calidad_del_Agua_Subterr_nea_p_2012-2024_15082025.xlsx`
 
 4. Open the notebook:
 ```bash
