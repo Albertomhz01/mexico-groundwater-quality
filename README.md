@@ -52,8 +52,8 @@ Place it in the `data/` folder and rename it `water_quality.xlsx`.
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/your-username/your-repo-name.git
-cd your-repo-name
+git clone https://github.com/Albertomhz01/mexico-groundwater-quality.git
+cd mexico-groundwater-quality
 ```
 
 2. Install dependencies:
