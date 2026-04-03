@@ -121,5 +121,3 @@ curl -X POST "http://127.0.0.1:8000/predict/dt" \
 ## Features Used
 
 The model is trained on 14 chemical parameters: alkalinity, conductivity, dissolved solids, fluorides, hardness, fecal coliforms, nitrates, arsenic, cadmium, chromium, mercury, lead, manganese, and iron.
-
-The model is trained on 14 chemical parameters including alkalinity, conductivity, dissolved solids, fluorides, hardness, fecal coliforms, nitrates, arsenic, cadmium, chromium, mercury, lead, manganese, and iron.
