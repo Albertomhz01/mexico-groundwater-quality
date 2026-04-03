@@ -23,7 +23,7 @@ This project uses chemical measurements from 2,728 groundwater monitoring sites 
 
 ```
 ├── data/
-│   └── water_quality.xlsx       # Download separately (see below)
+│   └── Calidad_del_Agua_Subterr_nea_p_2012-2024_15082025.xlsx       # Download separately (see below)
 ├── icon/
 │   └── favicon.png
 ├── models/
