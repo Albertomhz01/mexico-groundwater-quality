@@ -33,7 +33,7 @@ This project uses chemical measurements from 2,728 groundwater monitoring sites 
 
 Download the dataset from CONAGUA (Mexico's National Water Commission):
 
-👉 https://www.gob.mx/conagua/es/articulos/indicadores-de-calidad-del-agua?idiom=es
+-> https://www.gob.mx/conagua/es/articulos/indicadores-de-calidad-del-agua?idiom=es
 
 Scroll to the last section of the page: **"Indicadores de la calidad del agua subterránea a nivel nacional"**. Download the file under **B. Periodo 2012-2024 → Calidad del Agua Subterránea (Excel)**.
 
