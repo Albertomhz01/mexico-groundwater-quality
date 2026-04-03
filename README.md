@@ -44,7 +44,7 @@ Download the dataset from CONAGUA (Mexico's National Water Commission):
 
 Scroll to the last section: **"Indicadores de la calidad del agua subterránea a nivel nacional"**. Download the file under **B. Periodo 2012-2024 → Calidad del Agua Subterránea (Excel)**.
 
-Place it in the `data/` folder and rename it `water_quality.xlsx`.
+Place it in the `data/` folder with the name of `Calidad_del_Agua_Subterr_nea_p_2012-2024_15082025.xlsx`.
 
 ## How to Run
 
