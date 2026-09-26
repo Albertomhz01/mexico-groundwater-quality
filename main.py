@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 import joblib
@@ -8,6 +9,13 @@ import numpy as np
 import pandas as pd
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],   # tighten this in production
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # --- Feature order ---
 FEATURE_ORDER = [

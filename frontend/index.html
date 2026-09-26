@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AquaWatch MX — Clasificación de Agua Subterránea</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0f1a;
+      --bg-card: #111827;
+      --bg-card2: #1a2235;
+      --border: rgba(255,255,255,0.07);
+      --border-hover: rgba(255,255,255,0.15);
+      --text: #f0f4ff;
+      --text-muted: #8892a8;
+      --text-dim: #4a5568;
+      --green: #22c55e;
+      --green-bg: rgba(34,197,94,0.10);
+      --yellow: #eab308;
+      --yellow-bg: rgba(234,179,8,0.10);
+      --red: #ef4444;
+      --red-bg: rgba(239,68,68,0.10);
+      --accent: #38bdf8;
+      --accent-bg: rgba(56,189,248,0.10);
+      --accent2: #818cf8;
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Outfit', sans-serif;
+      font-weight: 400;
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    /* ── Header ── */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem 2.5rem;
+      border-bottom: 1px solid var(--border);
+      background: rgba(10,15,26,0.85);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-icon {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .logo-icon svg { width: 20px; height: 20px; fill: white; }
+
+    .logo-name {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.35rem;
+      letter-spacing: -0.02em;
+      color: var(--text);
+    }
+
+    .logo-name span { color: var(--accent); }
+
+    .header-badge {
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 4px 12px;
+    }
+
+    /* ── Layout ── */
+    main {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 2.5rem 2rem 4rem;
+      display: grid;
+      gap: 2rem;
+    }
+
+    .section-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 1rem;
+    }
+
+    /* ── Model selector ── */
+    .model-selector {
+      display: flex;
+      gap: 10px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 6px;
+      width: fit-content;
+    }
+
+    .model-btn {
+      padding: 8px 22px;
+      border-radius: var(--radius-sm);
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .model-btn.active {
+      background: var(--bg-card2);
+      color: var(--text);
+      box-shadow: inset 0 0 0 1px var(--border-hover);
+    }
+
+    .model-btn:hover:not(.active) { color: var(--text); }
+
+    /* ── Input grid ── */
+    .input-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 14px;
+    }
+
+    .input-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      transition: border-color 0.2s;
+    }
+
+    .input-card:focus-within { border-color: var(--accent); }
+
+    .input-label {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .input-unit {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.68rem;
+      color: var(--text-dim);
+    }
+
+    .input-name {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .field-input {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.95rem;
+      padding: 8px 10px;
+      transition: border-color 0.2s;
+      outline: none;
+    }
+
+    .field-input:focus { border-color: var(--accent); }
+    .field-input::-webkit-outer-spin-button,
+    .field-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+    /* ── Buttons ── */
+    .actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .btn-predict {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: white;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 12px 32px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s;
+      letter-spacing: 0.01em;
+    }
+
+    .btn-predict:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-predict:active { transform: translateY(0); }
+    .btn-predict:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    .btn-reset {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px 22px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-reset:hover { color: var(--text); border-color: var(--border-hover); }
+
+    .btn-sample {
+      background: transparent;
+      color: var(--accent);
+      border: 1px solid rgba(56,189,248,0.25);
+      border-radius: var(--radius-sm);
+      padding: 12px 22px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-sample:hover { background: var(--accent-bg); }
+
+    /* ── Results ── */
+    .results-grid {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 860px) {
+      .results-grid { grid-template-columns: 1fr; }
+    }
+
+    .result-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      min-height: 240px;
+      transition: border-color 0.4s;
+    }
+
+    .result-card.verde { border-color: rgba(34,197,94,0.4); }
+    .result-card.amarillo { border-color: rgba(234,179,8,0.4); }
+    .result-card.rojo { border-color: rgba(239,68,68,0.4); }
+
+    .result-status-dot {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      margin-bottom: 1rem;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem;
+      transition: background 0.4s;
+    }
+
+    .result-status-dot.verde { background: var(--green-bg); }
+    .result-status-dot.amarillo { background: var(--yellow-bg); }
+    .result-status-dot.rojo { background: var(--red-bg); }
+    .result-status-dot.idle { background: var(--bg-card2); }
+
+    .result-label {
+      font-family: 'DM Serif Display', serif;
+      font-size: 2.2rem;
+      letter-spacing: -0.02em;
+      transition: color 0.4s;
+    }
+
+    .result-label.verde { color: var(--green); }
+    .result-label.amarillo { color: var(--yellow); }
+    .result-label.rojo { color: var(--red); }
+    .result-label.idle { color: var(--text-dim); }
+
+    .result-sublabel {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    .result-model-tag {
+      margin-top: 1rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      font-family: 'DM Mono', monospace;
+    }
+
+    /* ── Radar / Bar chart panel ── */
+    .chart-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.75rem;
+    }
+
+    .chart-title {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+    }
+
+    .chart-wrap {
+      position: relative;
+      height: 240px;
+    }
+
+    /* ── History table ── */
+    .history-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .history-header {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .history-title {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    .history-count {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+    }
+
+    .history-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+
+    .history-table th {
+      padding: 10px 16px;
+      text-align: left;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .history-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+      color: var(--text-muted);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.8rem;
+    }
+
+    .history-table tr:last-child td { border-bottom: none; }
+    .history-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .badge-verde { background: var(--green-bg); color: var(--green); }
+    .badge-amarillo { background: var(--yellow-bg); color: var(--yellow); }
+    .badge-rojo { background: var(--red-bg); color: var(--red); }
+    .badge-none { background: var(--bg-card2); color: var(--text-dim); }
+
+    /* ── Spinner ── */
+    .spinner {
+      display: inline-block;
+      width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,0.2);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .empty-history {
+      padding: 2rem;
+      text-align: center;
+      color: var(--text-dim);
+      font-size: 0.85rem;
+    }
+
+    /* ── Thresholds legend ── */
+    .legend {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .legend-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+    }
+
+    .error-msg {
+      background: var(--red-bg);
+      border: 1px solid rgba(239,68,68,0.3);
+      border-radius: var(--radius-sm);
+      color: var(--red);
+      padding: 12px 16px;
+      font-size: 0.85rem;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2C8.5 2 5 6 5 10c0 5.25 7 12 7 12s7-6.75 7-12c0-4-3.5-8-7-8zm0 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/>
+      </svg>
+    </div>
+    <span class="logo-name">Aqua<span>Watch</span> MX</span>
+  </div>
+  <span class="header-badge">Clasificación Agua Subterránea</span>
+</header>
+
+<main>
+
+  <!-- Model selector -->
+  <div>
+    <p class="section-label">Modelo de clasificación</p>
+    <div class="model-selector">
+      <button class="model-btn active" id="btn-dt" onclick="selectModel('dt')">Árbol de Decisión</button>
+      <button class="model-btn" id="btn-nn" onclick="selectModel('nn')">Red Neuronal</button>
+    </div>
+  </div>
+
+  <!-- Input grid -->
+  <div>
+    <p class="section-label">Parámetros físicoquímicos</p>
+    <div class="input-grid" id="input-grid"></div>
+    <div style="margin-top:1rem;" id="error-msg" class="error-msg"></div>
+  </div>
+
+  <!-- Actions -->
+  <div class="actions">
+    <button class="btn-predict" id="btn-predict" onclick="runPrediction()">Clasificar muestra</button>
+    <button class="btn-sample" onclick="loadSample()">Cargar muestra de ejemplo</button>
+    <button class="btn-reset" onclick="resetForm()">Limpiar</button>
+  </div>
+
+  <!-- Results -->
+  <div>
+    <p class="section-label">Resultado</p>
+    <div class="results-grid">
+      <div class="result-card" id="result-card">
+        <div class="result-status-dot idle" id="result-dot">💧</div>
+        <div class="result-label idle" id="result-label">—</div>
+        <div class="result-sublabel" id="result-sublabel">Ingresa los parámetros y ejecuta la clasificación</div>
+        <div class="result-model-tag" id="result-model-tag">— sin resultado —</div>
+      </div>
+      <div class="chart-card">
+        <p class="chart-title">Perfil de la muestra — valores normalizados respecto a límites NOM-127</p>
+        <div class="chart-wrap">
+          <canvas id="barChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Legend -->
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div> Verde — Agua apta para consumo</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--yellow)"></div> Amarillo — Requiere tratamiento</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div> Rojo — No apta, riesgo sanitario</div>
+  </div>
+
+  <!-- History -->
+  <div class="history-card">
+    <div class="history-header">
+      <span class="history-title">Historial de predicciones</span>
+      <span class="history-count" id="history-count">0 registros</span>
+    </div>
+    <div id="history-body">
+      <div class="empty-history">Aún no hay predicciones registradas en esta sesión.</div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+const API_BASE = '/api';
+
+const FIELDS = [
+  { key: 'ALC_mg_L',           name: 'Alcalinidad',        unit: 'mg/L',       placeholder: '200',  nom: 400 },
+  { key: 'CONDUCT_mS_cm',      name: 'Conductividad',      unit: 'mS/cm',      placeholder: '0.5',  nom: 1.5 },
+  { key: 'SDT_mg_L',           name: 'Sólidos Disueltos',  unit: 'mg/L',       placeholder: '500',  nom: 1000 },
+  { key: 'FLUORUROS_mg_L',     name: 'Fluoruros',          unit: 'mg/L',       placeholder: '0.5',  nom: 1.5 },
+  { key: 'DUR_mg_L',           name: 'Dureza',             unit: 'mg/L',       placeholder: '200',  nom: 500 },
+  { key: 'COLI_FEC_NMP_100_mL',name: 'Coliformes Fecales', unit: 'NMP/100 mL', placeholder: '0',    nom: 0 },
+  { key: 'N_NO3_mg_L',         name: 'Nitratos (N)',       unit: 'mg/L',       placeholder: '5',    nom: 10 },
+  { key: 'AS_TOT_mg_L',        name: 'Arsénico',           unit: 'mg/L',       placeholder: '0.01', nom: 0.025 },
+  { key: 'CD_TOT_mg_L',        name: 'Cadmio',             unit: 'mg/L',       placeholder: '0.003',nom: 0.005 },
+  { key: 'CR_TOT_mg_L',        name: 'Cromo',              unit: 'mg/L',       placeholder: '0.05', nom: 0.05 },
+  { key: 'HG_TOT_mg_L',        name: 'Mercurio',           unit: 'mg/L',       placeholder: '0.001',nom: 0.001 },
+  { key: 'PB_TOT_mg_L',        name: 'Plomo',              unit: 'mg/L',       placeholder: '0.01', nom: 0.01 },
+  { key: 'MN_TOT_mg_L',        name: 'Manganeso',          unit: 'mg/L',       placeholder: '0.05', nom: 0.15 },
+  { key: 'FE_TOT_mg_L',        name: 'Hierro',             unit: 'mg/L',       placeholder: '0.2',  nom: 0.3 },
+];
+
+const SAMPLES = {
+  verde: {
+    ALC_mg_L:0.03,CONDUCT_mS_cm:0.32,SDT_mg_L:185,FLUORUROS_mg_L:0.4,DUR_mg_L:130,
+    COLI_FEC_NMP_100_mL:0,N_NO3_mg_L:3.2,AS_TOT_mg_L:0.005,CD_TOT_mg_L:0.001,
+    CR_TOT_mg_L:0.01,HG_TOT_mg_L:0.0001,PB_TOT_mg_L:0.003,MN_TOT_mg_L:0.02,FE_TOT_mg_L:0.08
+  },
+  amarillo: {
+    ALC_mg_L:0.035,CONDUCT_mS_cm:0.85,SDT_mg_L:620,FLUORUROS_mg_L:1.1,DUR_mg_L:310,
+    COLI_FEC_NMP_100_mL:5,N_NO3_mg_L:8.5,AS_TOT_mg_L:0.015,CD_TOT_mg_L:0.003,
+    CR_TOT_mg_L:0.03,HG_TOT_mg_L:0.0005,PB_TOT_mg_L:0.007,MN_TOT_mg_L:0.1,FE_TOT_mg_L:0.22
+  },
+  rojo: {
+    ALC_mg_L:0.04,CONDUCT_mS_cm:2.1,SDT_mg_L:1400,FLUORUROS_mg_L:3.5,DUR_mg_L:720,
+    COLI_FEC_NMP_100_mL:240,N_NO3_mg_L:18,AS_TOT_mg_L:0.06,CD_TOT_mg_L:0.012,
+    CR_TOT_mg_L:0.09,HG_TOT_mg_L:0.003,PB_TOT_mg_L:0.025,MN_TOT_mg_L:0.4,FE_TOT_mg_L:0.9
+  }
+};
+
+let selectedModel = 'dt';
+let history = [];
+let barChart = null;
+let sampleCycle = ['verde','amarillo','rojo'];
+let sampleIdx = 0;
+
+// ── Build inputs ──────────────────────────────────────────────
+function buildGrid() {
+  const grid = document.getElementById('input-grid');
+  grid.innerHTML = '';
+  FIELDS.forEach(f => {
+    grid.innerHTML += `
+      <div class="input-card">
+        <div class="input-label">
+          <span>${f.name}</span>
+          <span class="input-unit">${f.unit}</span>
+        </div>
+        <input class="field-input" type="number" id="f_${f.key}" step="any" min="0" placeholder="${f.placeholder}" />
+      </div>`;
+  });
+}
+
+function selectModel(m) {
+  selectedModel = m;
+  document.getElementById('btn-dt').classList.toggle('active', m === 'dt');
+  document.getElementById('btn-nn').classList.toggle('active', m === 'nn');
+}
+
+function getFormData() {
+  const data = {};
+  for (const f of FIELDS) {
+    const val = document.getElementById('f_' + f.key).value.trim();
+    if (val === '') return null;
+    data[f.key] = parseFloat(val);
+    if (isNaN(data[f.key]) || data[f.key] < 0) return null;
+  }
+  return data;
+}
+
+function loadSample() {
+  const key = sampleCycle[sampleIdx % sampleCycle.length];
+  sampleIdx++;
+  const s = SAMPLES[key];
+  FIELDS.forEach(f => {
+    document.getElementById('f_' + f.key).value = s[f.key];
+  });
+}
+
+function resetForm() {
+  FIELDS.forEach(f => { document.getElementById('f_' + f.key).value = ''; });
+  setResultIdle();
+  showError('');
+}
+
+// ── Chart ─────────────────────────────────────────────────────
+function buildChart() {
+  const ctx = document.getElementById('barChart').getContext('2d');
+  barChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: FIELDS.map(f => f.name),
+      datasets: [{
+        label: 'Valor / Límite NOM-127',
+        data: new Array(FIELDS.length).fill(0),
+        backgroundColor: FIELDS.map(() => 'rgba(56,189,248,0.25)'),
+        borderColor: FIELDS.map(() => 'rgba(56,189,248,0.7)'),
+        borderWidth: 1,
+        borderRadius: 4,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: {
+        callbacks: {
+          label: (ctx) => `${(ctx.raw * 100).toFixed(1)}% del límite NOM-127`
+        }
+      }},
+      scales: {
+        x: {
+          ticks: { color: '#8892a8', font: { size: 10 }, maxRotation: 45 },
+          grid: { color: 'rgba(255,255,255,0.04)' }
+        },
+        y: {
+          ticks: { color: '#8892a8', font: { size: 10 },
+            callback: v => (v * 100).toFixed(0) + '%'
+          },
+          grid: { color: 'rgba(255,255,255,0.06)' },
+          min: 0,
+        }
+      }
+    }
+  });
+}
+
+function updateChart(data, classification) {
+  const ratios = FIELDS.map(f => {
+    const nom = f.nom;
+    if (!nom || nom === 0) return data[f.key] > 0 ? 2 : 0;
+    return Math.min(data[f.key] / nom, 3);
+  });
+
+  const colors = {
+    VERDE:    'rgba(34,197,94,0.5)',
+    AMARILLO: 'rgba(234,179,8,0.5)',
+    ROJO:     'rgba(239,68,68,0.5)',
+  };
+  const borders = {
+    VERDE:    'rgba(34,197,94,0.9)',
+    AMARILLO: 'rgba(234,179,8,0.9)',
+    ROJO:     'rgba(239,68,68,0.9)',
+  };
+
+  barChart.data.datasets[0].data = ratios;
+  barChart.data.datasets[0].backgroundColor = ratios.map((r, i) =>
+    r >= 1 ? 'rgba(239,68,68,0.4)' : colors[classification] || 'rgba(56,189,248,0.25)'
+  );
+  barChart.data.datasets[0].borderColor = ratios.map((r, i) =>
+    r >= 1 ? 'rgba(239,68,68,0.9)' : borders[classification] || 'rgba(56,189,248,0.7)'
+  );
+  barChart.update();
+}
+
+// ── Result display ─────────────────────────────────────────────
+const STATUS_MAP = {
+  VERDE:    { emoji: '✅', text: 'VERDE',    sub: 'Agua apta para consumo humano' },
+  AMARILLO: { emoji: '⚠️', text: 'AMARILLO', sub: 'Requiere tratamiento previo al uso' },
+  ROJO:     { emoji: '🚫', text: 'ROJO',     sub: 'No apta — riesgo sanitario alto' },
+};
+
+function setResult(classification, model) {
+  const s = STATUS_MAP[classification];
+  const cls = classification.toLowerCase();
+  const card = document.getElementById('result-card');
+  const dot = document.getElementById('result-dot');
+  const lbl = document.getElementById('result-label');
+  const sub = document.getElementById('result-sublabel');
+  const tag = document.getElementById('result-model-tag');
+
+  card.className = 'result-card ' + cls;
+  dot.className = 'result-status-dot ' + cls;
+  dot.textContent = s.emoji;
+  lbl.className = 'result-label ' + cls;
+  lbl.textContent = s.text;
+  sub.textContent = s.sub;
+  tag.textContent = model === 'dt' ? 'Árbol de Decisión' : 'Red Neuronal';
+}
+
+function setResultIdle() {
+  const card = document.getElementById('result-card');
+  const dot = document.getElementById('result-dot');
+  const lbl = document.getElementById('result-label');
+  const sub = document.getElementById('result-sublabel');
+  const tag = document.getElementById('result-model-tag');
+  card.className = 'result-card';
+  dot.className = 'result-status-dot idle';
+  dot.textContent = '💧';
+  lbl.className = 'result-label idle';
+  lbl.textContent = '—';
+  sub.textContent = 'Ingresa los parámetros y ejecuta la clasificación';
+  tag.textContent = '— sin resultado —';
+}
+
+function showError(msg) {
+  const el = document.getElementById('error-msg');
+  el.style.display = msg ? 'block' : 'none';
+  el.textContent = msg;
+}
+
+// ── History ───────────────────────────────────────────────────
+function addToHistory(data, result, model) {
+  history.unshift({ data, result, model, ts: new Date().toLocaleTimeString('es-MX') });
+  renderHistory();
+}
+
+function renderHistory() {
+  const body = document.getElementById('history-body');
+  document.getElementById('history-count').textContent = history.length + ' registro' + (history.length !== 1 ? 's' : '');
+  if (history.length === 0) {
+    body.innerHTML = '<div class="empty-history">Aún no hay predicciones registradas en esta sesión.</div>';
+    return;
+  }
+  const rows = history.slice(0, 10).map(h => {
+    const cls = h.result.toLowerCase();
+    return `<tr>
+      <td>${h.ts}</td>
+      <td>${h.model === 'dt' ? 'Árbol' : 'Red Neuronal'}</td>
+      <td>${h.data.AS_TOT_mg_L.toFixed(4)}</td>
+      <td>${h.data.FLUORUROS_mg_L.toFixed(2)}</td>
+      <td>${h.data.N_NO3_mg_L.toFixed(2)}</td>
+      <td><span class="badge badge-${cls}">${h.result}</span></td>
+    </tr>`;
+  }).join('');
+  body.innerHTML = `<table class="history-table">
+    <thead><tr>
+      <th>Hora</th><th>Modelo</th><th>As (mg/L)</th><th>F⁻ (mg/L)</th><th>NO₃ (mg/L)</th><th>Resultado</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+// ── Prediction ────────────────────────────────────────────────
+async function runPrediction() {
+  showError('');
+  const data = getFormData();
+  if (!data) {
+    showError('Por favor, completa todos los campos con valores numéricos no negativos.');
+    return;
+  }
+
+  const btn = document.getElementById('btn-predict');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Clasificando…';
+
+  try {
+    const endpoint = `${API_BASE}/predict/${selectedModel}`;
+    const resp = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({}));
+      throw new Error(err.detail || `Error ${resp.status}`);
+    }
+
+    const result = await resp.json();
+    const classification = result.prediction;
+
+    setResult(classification, selectedModel);
+    updateChart(data, classification);
+    addToHistory(data, classification, selectedModel);
+
+  } catch (e) {
+    showError('No se pudo conectar con la API: ' + e.message + '. Verifica que el servidor esté corriendo en ' + API_BASE);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = 'Clasificar muestra';
+  }
+}
+
+// ── Init ──────────────────────────────────────────────────────
+buildGrid();
+buildChart();
+renderHistory();
+</script>
+</body>
+</html>
